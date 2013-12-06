@@ -1,0 +1,5 @@
+name: ${project.name}
+main: org.dequis.tenjava.Derp
+version: ${project.version}
+author: dx
+description: "what is this i don't even"
