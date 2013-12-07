@@ -10,9 +10,14 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.Material;
+import org.bukkit.event.Listener;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.player.PlayerEditBookEvent;
+import org.bukkit.Bukkit;
 
-public class Derp extends JavaPlugin {
+public class Derp extends JavaPlugin implements Listener{
     public void onEnable() {
+        getServer().getPluginManager().registerEvents(this, this);
         this.getLogger().info("Enablified");
     }
 
@@ -39,7 +44,8 @@ public class Derp extends JavaPlugin {
                     "5th RULE: One fight at a time.\n",
                     "6th RULE: No shirts, no shoes.\n" +
                     "7th RULE: Fights will go on as long as they have to.\n" +
-                    "8th RULE: If this is your first night at FIGHT CLUB, you HAVE to fight.\n"
+                    "8th RULE: If this is your first night at FIGHT CLUB, you HAVE to fight.\n",
+                    "Don't sign the book, btw"
                 );
                 stack.setItemMeta(meat);
                 w.dropItem(loc, stack);
@@ -49,5 +55,24 @@ public class Derp extends JavaPlugin {
             return true;
         }
         return false;
+    }
+
+    @EventHandler
+    public void onBookEdit(PlayerEditBookEvent event) {
+        final Player player = event.getPlayer();
+        if (event.isSigning()) {
+            this.nukePlayerAfterAWhile(player, 1);
+        }
+
+    }
+
+    private void nukePlayerAfterAWhile(final Player player, int awhile) {
+        player.sendMessage("gg no re");
+        Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
+            public void run() {
+                player.getEquipment().clear();
+                player.setHealth(0);
+            }
+        }, awhile * 20);
     }
 }
