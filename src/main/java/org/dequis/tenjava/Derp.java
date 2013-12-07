@@ -50,60 +50,32 @@ public class Derp extends JavaPlugin implements Listener{
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (cmd.getName().equalsIgnoreCase("derp")){
             if (!(sender instanceof Player)) {
-                sender.sendMessage("pls no");
                 return true;
             }
+
             final Player player = (Player) sender;
 
             Location loc = player.getLocation();
             World world = loc.getWorld();
+
             if (args.length == 0) {
-                this.god = player;
-                loc.setY(loc.getY() + 64);
-                ItemStack stack = new ItemStack(Material.BOOK_AND_QUILL);
-                ItemMeta meat = stack.getItemMeta();
-                meat.setDisplayName(LOL_BOOK_IDENTIFIER);
-                ((BookMeta) meat).setPages(
-                    "~derpbook~"
-                );
-                stack.setItemMeta(meat);
-                book = world.dropItem(loc, stack);
 
-                Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
-                    public void run() {
-                        for (Entity e : player.getNearbyEntities(64, 64, 64)) {
-                            if (player.hasLineOfSight(e)) {
-                                Derp.this.setLastSeen(e);
-                            }
-                        }
-                    }
-                }, 0, 20);
-
-
+                this.createANewGod(player);
                 player.sendMessage("Derp successful.");
                 return true;
-             } else if (args.length == 1 && args[0].equals("2")) {
+
+            } else if (args.length == 1 && args[0].equals("2")) {
+
                 loc.setX(loc.getX() + 5);
                 loc.setY(loc.getY() + 30);
-
-                fire = world.dropItem(loc, new ItemStack(Material.FIRE));
-                skeleton = (Skeleton) world.spawnEntity(loc, EntityType.SKELETON);
-
-                fire.setPickupDelay(A_LOT);
-                skeleton.setMaxHealth(A_LOT);
-                skeleton.setHealth(A_LOT);
-                skeleton.setNoDamageTicks(A_LOT);
-                skeleton.setSkeletonType(SkeletonType.WITHER);
-                skeleton.setTarget(player);
-
-                fire.setPassenger(skeleton);
-
-                player.sendMessage("§7§o<skeleton> my butt is warm");
-
+                this.invokeTheDeathGod(loc);
                 return true;
+
             } else if (args.length == 1 && args[0].equals("seen")) {
+
                 player.sendMessage("§7§oLast seen: " + (this.getLastSeen(skeleton) / 20));
                 return true;
+
             }
 
         }
@@ -196,5 +168,51 @@ public class Derp extends JavaPlugin implements Listener{
 
     private void setLastSeen(Entity entity) {
         entity.setMetadata("derp_last_seen", new FixedMetadataValue(this, entity.getWorld().getFullTime()));
+    }
+
+    private void createANewGod(final Player player) {
+        Location loc = player.getLocation();
+        World world = player.getWorld();
+
+        this.god = player;
+        loc.setY(loc.getY() + 64);
+
+        book = world.dropItem(loc, this.createBookItemStack());
+
+        Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
+            public void run() {
+                for (Entity e : player.getNearbyEntities(64, 64, 64)) {
+                    if (player.hasLineOfSight(e)) {
+                        Derp.this.setLastSeen(e);
+                    }
+                }
+            }
+        }, 0, 20);
+    }
+
+    private ItemStack createBookItemStack() {
+        ItemStack stack = new ItemStack(Material.BOOK_AND_QUILL);
+        ItemMeta meat = stack.getItemMeta();
+        meat.setDisplayName(LOL_BOOK_IDENTIFIER);
+        ((BookMeta) meat).setPages(
+            "~derpbook~"
+        );
+        stack.setItemMeta(meat);
+        return stack;
+    }
+
+    private void invokeTheDeathGod(Location loc) {
+        World world = loc.getWorld();
+
+        fire = world.dropItem(loc, new ItemStack(Material.FIRE));
+        skeleton = (Skeleton) world.spawnEntity(loc, EntityType.SKELETON);
+
+        fire.setPickupDelay(A_LOT);
+        skeleton.setMaxHealth(A_LOT);
+        skeleton.setHealth(A_LOT);
+        skeleton.setNoDamageTicks(A_LOT);
+        skeleton.setSkeletonType(SkeletonType.WITHER);
+
+        fire.setPassenger(skeleton);
     }
 }
