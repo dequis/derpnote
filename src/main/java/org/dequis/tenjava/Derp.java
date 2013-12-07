@@ -61,6 +61,8 @@ public class Derp extends JavaPlugin implements Listener{
     public void onBookEdit(PlayerEditBookEvent event) {
         final Player player = event.getPlayer();
         if (event.isSigning()) {
+            event.setCancelled(true);
+            this.stealBookFromInventory(player, event.getSlot());
             this.nukePlayerAfterAWhile(player, 1);
         }
 
@@ -70,9 +72,18 @@ public class Derp extends JavaPlugin implements Listener{
         player.sendMessage("gg no re");
         Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
             public void run() {
-                player.getEquipment().clear();
+                player.getInventory().clear();
                 player.setHealth(0);
             }
         }, awhile * 20);
+    }
+
+    private void stealBookFromInventory(final Player player, final int slot) {
+        // gotta use the scheduler because the client crashes otherwise kek
+        Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
+            public void run() {
+                player.getInventory().clear(slot);
+            }
+        }, 0);
     }
 }
