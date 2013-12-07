@@ -19,6 +19,8 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.Skeleton.SkeletonType;
 import org.bukkit.entity.Item;
+import java.util.HashSet;
+import java.util.List;
 
 public class Derp extends JavaPlugin implements Listener{
     final static String LOL_BOOK_IDENTIFIER = "derpbook";
@@ -27,14 +29,17 @@ public class Derp extends JavaPlugin implements Listener{
     private Item book;
     private Item fire;
     private Skeleton skeleton;
+    private HashSet<String> seenLines;
 
     public void onEnable() {
-        getServer().getPluginManager().registerEvents(this, this);
+        this.getServer().getPluginManager().registerEvents(this, this);
+        this.seenLines = new HashSet<String>();
         this.getLogger().info("Enablified");
     }
 
     public void onDisable() {
         this.nukeFireAndSkeletonAndBook();
+        this.seenLines.clear();
     }
 
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
@@ -52,16 +57,7 @@ public class Derp extends JavaPlugin implements Listener{
                 ItemMeta meat = stack.getItemMeta();
                 meat.setDisplayName(LOL_BOOK_IDENTIFIER);
                 ((BookMeta) meat).setPages(
-                    "Rules of Fight Club\n" +
-                    "1st RULE: You do not talk about FIGHT CLUB.\n" +
-                    "2nd RULE: You DO NOT talk about FIGHT CLUB.\n" +
-                    "3rd RULE: If someone says \"stop\" or goes limp, taps out the fight is over.\n" +
-                    "4th RULE: Only two guys to a fight.\n" +
-                    "5th RULE: One fight at a time.\n",
-                    "6th RULE: No shirts, no shoes.\n" +
-                    "7th RULE: Fights will go on as long as they have to.\n" +
-                    "8th RULE: If this is your first night at FIGHT CLUB, you HAVE to fight.\n",
-                    "Don't sign the book, btw"
+                    "~derpbook~"
                 );
                 stack.setItemMeta(meat);
                 book = world.dropItem(loc, stack);
@@ -103,6 +99,8 @@ public class Derp extends JavaPlugin implements Listener{
                 event.setCancelled(true);
                 this.stealBookFromInventory(player, event.getSlot());
                 this.nukePlayerAfterAWhile(player, 1);
+            } else {
+                this.scanLines(newMeta);
             }
         }
 
@@ -145,5 +143,22 @@ public class Derp extends JavaPlugin implements Listener{
         nukeShit((Entity) book);
         fire = book = null;
         skeleton = null;
+    }
+
+    private void scanLines(BookMeta meat) {
+        List<String> pages = meat.getPages();
+        for (String page : pages) {
+            for (String line : page.split("\\n")) {
+                if (!line.startsWith("~") && line.length() > 1 && !this.seenLines.contains(line) ) {
+                    this.seeNewLine(line);
+                }
+            }
+        }
+    }
+
+    private void seeNewLine(String line) {
+        this.seenLines.add(line);
+        this.getLogger().info("see new line: " + line);
+        /* TODO: do horrible things here */
     }
 }
