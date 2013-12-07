@@ -19,3 +19,10 @@ Compilation
 - Clone the repository: `git clone https://github.com/tenjavacontest/dequis.git`
 - Compile and create the plugin package using Maven: `mvn clean install`
   - __Note:__ Maven will download all required dependencies and build a ready for use plugin package!
+
+---------------------------------------
+
+Usage
+-------------
+
+Type /derp to get a derp note. /derp <nick> to give to someone else.
