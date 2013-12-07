@@ -71,10 +71,6 @@ public class Derp extends JavaPlugin implements Listener{
 
                 Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
                     public void run() {
-                        // TODO turn this into a timer
-                        if (player != Derp.this.god) {
-                            return;
-                        }
                         for (Entity e : player.getNearbyEntities(64, 64, 64)) {
                             if (player.hasLineOfSight(e)) {
                                 Derp.this.setLastSeen(e);
