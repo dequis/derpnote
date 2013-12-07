@@ -16,6 +16,8 @@
                 <directory>${basedir}/src/main/resources/</directory>
                 <includes>
                     <include>*.yml</include>
+                    <include>*.gif</include>
+                    <include>*.txt</include>
                 </includes>
             </resource>
         </resources>
