@@ -14,9 +14,15 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerEditBookEvent;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Skeleton;
+import org.bukkit.entity.Skeleton.SkeletonType;
+import org.bukkit.entity.Item;
 
 public class Derp extends JavaPlugin implements Listener{
     final static String LOL_BOOK_IDENTIFIER = "derpbook";
+    final static int A_LOT = 2147483647;
 
     public void onEnable() {
         getServer().getPluginManager().registerEvents(this, this);
@@ -30,9 +36,9 @@ public class Derp extends JavaPlugin implements Listener{
                 return true;
             }
 
+            Location loc = ((Player) sender).getLocation();
+            World world = loc.getWorld();
             if (args.length == 0) {
-                Location loc = ((Player) sender).getLocation();
-                World w = loc.getWorld();
                 loc.setY(loc.getY() + 64);
                 ItemStack stack = new ItemStack(Material.BOOK_AND_QUILL);
                 ItemMeta meat = stack.getItemMeta();
@@ -50,8 +56,25 @@ public class Derp extends JavaPlugin implements Listener{
                     "Don't sign the book, btw"
                 );
                 stack.setItemMeta(meat);
-                w.dropItem(loc, stack);
-            }
+                world.dropItem(loc, stack);
+             } else if (args.length == 1 && args[0].equals("2")) {
+                loc.setX(loc.getX() + 5);
+
+                Item e1 = world.dropItem(loc, new ItemStack(Material.FIRE));
+                Skeleton e2 = (Skeleton) world.spawnEntity(loc, EntityType.SKELETON);
+
+                e1.setPickupDelay(A_LOT);
+                e2.setMaxHealth(A_LOT);
+                e2.setHealth(A_LOT);
+                e2.setNoDamageTicks(A_LOT);
+                e2.setSkeletonType(SkeletonType.WITHER);
+                e2.setTarget((Player) sender);
+
+                e1.setPassenger(e2);
+                sender.sendMessage("§7§o<skeleton> my butt is warm");
+
+                return true;
+             }
 
             sender.sendMessage("Derp successful.");
             return true;
