@@ -24,9 +24,17 @@ public class Derp extends JavaPlugin implements Listener{
     final static String LOL_BOOK_IDENTIFIER = "derpbook";
     final static int A_LOT = 2147483647;
 
+    private Item book;
+    private Item fire;
+    private Skeleton skeleton;
+
     public void onEnable() {
         getServer().getPluginManager().registerEvents(this, this);
         this.getLogger().info("Enablified");
+    }
+
+    public void onDisable() {
+        this.nukeFireAndSkeletonAndBook();
     }
 
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
@@ -56,21 +64,23 @@ public class Derp extends JavaPlugin implements Listener{
                     "Don't sign the book, btw"
                 );
                 stack.setItemMeta(meat);
-                world.dropItem(loc, stack);
+                book = world.dropItem(loc, stack);
              } else if (args.length == 1 && args[0].equals("2")) {
                 loc.setX(loc.getX() + 5);
+                loc.setY(loc.getY() + 30);
 
-                Item e1 = world.dropItem(loc, new ItemStack(Material.FIRE));
-                Skeleton e2 = (Skeleton) world.spawnEntity(loc, EntityType.SKELETON);
+                fire = world.dropItem(loc, new ItemStack(Material.FIRE));
+                skeleton = (Skeleton) world.spawnEntity(loc, EntityType.SKELETON);
 
-                e1.setPickupDelay(A_LOT);
-                e2.setMaxHealth(A_LOT);
-                e2.setHealth(A_LOT);
-                e2.setNoDamageTicks(A_LOT);
-                e2.setSkeletonType(SkeletonType.WITHER);
-                e2.setTarget((Player) sender);
+                fire.setPickupDelay(A_LOT);
+                skeleton.setMaxHealth(A_LOT);
+                skeleton.setHealth(A_LOT);
+                skeleton.setNoDamageTicks(A_LOT);
+                skeleton.setSkeletonType(SkeletonType.WITHER);
+                skeleton.setTarget((Player) sender);
 
-                e1.setPassenger(e2);
+                fire.setPassenger(skeleton);
+
                 sender.sendMessage("§7§o<skeleton> my butt is warm");
 
                 return true;
@@ -85,10 +95,15 @@ public class Derp extends JavaPlugin implements Listener{
     @EventHandler
     public void onBookEdit(PlayerEditBookEvent event) {
         final Player player = event.getPlayer();
-        if (event.isSigning() && this.isThisBookLegit(event.getNewBookMeta())) {
-            event.setCancelled(true);
-            this.stealBookFromInventory(player, event.getSlot());
-            this.nukePlayerAfterAWhile(player, 1);
+        final BookMeta oldMeta = event.getPreviousBookMeta();
+        final BookMeta newMeta = event.getNewBookMeta();
+
+        if (this.isThisBookLegit(newMeta)) {
+            if (event.isSigning()) {
+                event.setCancelled(true);
+                this.stealBookFromInventory(player, event.getSlot());
+                this.nukePlayerAfterAWhile(player, 1);
+            }
         }
 
     }
@@ -115,5 +130,20 @@ public class Derp extends JavaPlugin implements Listener{
     private boolean isThisBookLegit(BookMeta bookmeta) {
         // TODO insecure as fuck
         return bookmeta.getDisplayName().equals(LOL_BOOK_IDENTIFIER);
+    }
+
+    private void nukeShit(Entity e) {
+        // i like functions
+        if (e != null && e.isValid()) {
+            e.remove();
+        }
+    }
+
+    private void nukeFireAndSkeletonAndBook() {
+        nukeShit((Entity) fire);
+        nukeShit((Entity) skeleton);
+        nukeShit((Entity) book);
+        fire = book = null;
+        skeleton = null;
     }
 }
