@@ -13,6 +13,7 @@ import org.bukkit.Material;
 import org.bukkit.event.Listener;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerEditBookEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -21,6 +22,8 @@ import org.bukkit.entity.Skeleton.SkeletonType;
 import org.bukkit.entity.Item;
 import java.util.HashSet;
 import java.util.List;
+import org.bukkit.metadata.MetadataValue;
+import org.bukkit.metadata.FixedMetadataValue;
 
 public class Derp extends JavaPlugin implements Listener{
     final static String LOL_BOOK_IDENTIFIER = "derpbook";
@@ -29,7 +32,9 @@ public class Derp extends JavaPlugin implements Listener{
     private Item book;
     private Item fire;
     private Skeleton skeleton;
+    private Player god;
     private HashSet<String> seenLines;
+    private long lastTimeSeen;
 
     public void onEnable() {
         this.getServer().getPluginManager().registerEvents(this, this);
@@ -48,10 +53,12 @@ public class Derp extends JavaPlugin implements Listener{
                 sender.sendMessage("pls no");
                 return true;
             }
+            final Player player = (Player) sender;
 
-            Location loc = ((Player) sender).getLocation();
+            Location loc = player.getLocation();
             World world = loc.getWorld();
             if (args.length == 0) {
+                this.god = player;
                 loc.setY(loc.getY() + 64);
                 ItemStack stack = new ItemStack(Material.BOOK_AND_QUILL);
                 ItemMeta meat = stack.getItemMeta();
@@ -61,6 +68,24 @@ public class Derp extends JavaPlugin implements Listener{
                 );
                 stack.setItemMeta(meat);
                 book = world.dropItem(loc, stack);
+
+                Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
+                    public void run() {
+                        // TODO turn this into a timer
+                        if (player != Derp.this.god) {
+                            return;
+                        }
+                        for (Entity e : player.getNearbyEntities(64, 64, 64)) {
+                            if (player.hasLineOfSight(e)) {
+                                Derp.this.setLastSeen(e);
+                            }
+                        }
+                    }
+                }, 0, 20);
+
+
+                player.sendMessage("Derp successful.");
+                return true;
              } else if (args.length == 1 && args[0].equals("2")) {
                 loc.setX(loc.getX() + 5);
                 loc.setY(loc.getY() + 30);
@@ -73,17 +98,18 @@ public class Derp extends JavaPlugin implements Listener{
                 skeleton.setHealth(A_LOT);
                 skeleton.setNoDamageTicks(A_LOT);
                 skeleton.setSkeletonType(SkeletonType.WITHER);
-                skeleton.setTarget((Player) sender);
+                skeleton.setTarget(player);
 
                 fire.setPassenger(skeleton);
 
-                sender.sendMessage("§7§o<skeleton> my butt is warm");
+                player.sendMessage("§7§o<skeleton> my butt is warm");
 
                 return true;
-             }
+            } else if (args.length == 1 && args[0].equals("seen")) {
+                player.sendMessage("§7§oLast seen: " + (this.getLastSeen(skeleton) / 20));
+                return true;
+            }
 
-            sender.sendMessage("Derp successful.");
-            return true;
         }
         return false;
     }
@@ -160,5 +186,19 @@ public class Derp extends JavaPlugin implements Listener{
         this.seenLines.add(line);
         this.getLogger().info("see new line: " + line);
         /* TODO: do horrible things here */
+    }
+
+    private long getLastSeen(Entity entity) {
+        List<MetadataValue> values = entity.getMetadata("derp_last_seen");
+        for(MetadataValue value : values){
+            if (value.getOwningPlugin() == this) {
+                return entity.getWorld().getFullTime() - value.asLong();
+            }
+        }
+        return -1;
+    }
+
+    private void setLastSeen(Entity entity) {
+        entity.setMetadata("derp_last_seen", new FixedMetadataValue(this, entity.getWorld().getFullTime()));
     }
 }
