@@ -16,6 +16,8 @@ import org.bukkit.event.player.PlayerEditBookEvent;
 import org.bukkit.Bukkit;
 
 public class Derp extends JavaPlugin implements Listener{
+    final static String LOL_BOOK_IDENTIFIER = "derpbook";
+
     public void onEnable() {
         getServer().getPluginManager().registerEvents(this, this);
         this.getLogger().info("Enablified");
@@ -34,7 +36,7 @@ public class Derp extends JavaPlugin implements Listener{
                 loc.setY(loc.getY() + 64);
                 ItemStack stack = new ItemStack(Material.BOOK_AND_QUILL);
                 ItemMeta meat = stack.getItemMeta();
-                meat.setDisplayName("Derpbook");
+                meat.setDisplayName(LOL_BOOK_IDENTIFIER);
                 ((BookMeta) meat).setPages(
                     "Rules of Fight Club\n" +
                     "1st RULE: You do not talk about FIGHT CLUB.\n" +
@@ -60,7 +62,7 @@ public class Derp extends JavaPlugin implements Listener{
     @EventHandler
     public void onBookEdit(PlayerEditBookEvent event) {
         final Player player = event.getPlayer();
-        if (event.isSigning()) {
+        if (event.isSigning() && this.isThisBookLegit(event.getNewBookMeta())) {
             event.setCancelled(true);
             this.stealBookFromInventory(player, event.getSlot());
             this.nukePlayerAfterAWhile(player, 1);
@@ -85,5 +87,10 @@ public class Derp extends JavaPlugin implements Listener{
                 player.getInventory().clear(slot);
             }
         }, 0);
+    }
+
+    private boolean isThisBookLegit(BookMeta bookmeta) {
+        // TODO insecure as fuck
+        return bookmeta.getDisplayName().equals(LOL_BOOK_IDENTIFIER);
     }
 }
