@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.Material;
 
 public class Derp extends JavaPlugin {
@@ -21,15 +22,18 @@ public class Derp extends JavaPlugin {
                 return true;
             }
 
-            Location loc = ((Player) sender).getLocation();
-            World w = loc.getWorld();
+            if (args.length == 0) {
+                Location loc = ((Player) sender).getLocation();
+                World w = loc.getWorld();
+                loc.setY(loc.getY() + 64);
+                ItemStack stack = new ItemStack(Material.BOOK);
+                ItemMeta meat = stack.getItemMeta();
+                meat.setDisplayName("Derpbook");
+                stack.setItemMeta(meat);
+                w.dropItem(loc, stack);
+            }
 
-            loc.setY(loc.getY() + 64);
-            ItemStack stack = new ItemStack(Material.SPONGE);
-
-            w.dropItem(loc, stack);
-
-            sender.sendMessage("Derp successful. " + loc.toString());
+            sender.sendMessage("Derp successful.");
             return true;
         }
         return false;
